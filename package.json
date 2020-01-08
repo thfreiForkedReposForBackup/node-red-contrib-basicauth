@@ -1,0 +1,27 @@
+{
+  "name": "node-red-contrib-basicauth",
+  "version": "1.0.0",
+  "description": "Node-RED node providing basic access authentication for the HTTP In node",
+  "node-red": {
+    "nodes": {
+      "node-red-contrib-basicauth": "nodes/basic-auth.js"
+    }
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttrushin/node-red-contrib-basicauth.git"
+  },
+  "keywords": [
+    "node-red",
+    "http",
+    "basic",
+    "authentication"
+  ],
+  "author": "Tyler Trushin",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ttrushin/node-red-contrib-basicauth/issues"
+  },
+  "homepage": "https://github.com/ttrushin/node-red-contrib-basicauth"
+}
