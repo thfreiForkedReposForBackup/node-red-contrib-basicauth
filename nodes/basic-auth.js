@@ -1,4 +1,4 @@
-function verifyBasicAuth({nodeMsg, rawAuthData, getUser, send, realm}) {
+function verifyBasicAuth({nodeMsg, rawAuthData, getUser, send, realm, req, res}) {
   const decodedAuthString = new Buffer(rawAuthData, "base64").toString();
 
   const authenticatingUser = decodedAuthString.split(":");
@@ -16,7 +16,8 @@ function verifyBasicAuth({nodeMsg, rawAuthData, getUser, send, realm}) {
     } else {
       handleFailedAuthAttempt({
         send,
-        nodeMsg,
+        req,
+        res,
         errorMsg: `Invalid password for username "${username}"`,
         username,
         realm
@@ -25,7 +26,8 @@ function verifyBasicAuth({nodeMsg, rawAuthData, getUser, send, realm}) {
   } catch (error) {
     handleFailedAuthAttempt({
       send,
-      nodeMsg,
+      req,
+      res,
       errorMsg: `Invalid username "${username}"`,
       username,
       realm
@@ -33,9 +35,7 @@ function verifyBasicAuth({nodeMsg, rawAuthData, getUser, send, realm}) {
   }
 }
 
-const requestAuth = ({nodeMsg, realm}) => {
-	const res = nodeMsg.res._res || nodeMsg.res;
-
+const requestAuth = ({realm, res}) => {
 	res.set("WWW-Authenticate", `Basic realm="${realm}"`);
 	res.type("text/plain");
   res.status(401).send("401 Unauthorized");
@@ -45,15 +45,18 @@ const handleSuccessfulAuth = ({send, nodeMsg}) => {
   send([nodeMsg, null]);
 }
 
-const handleFailedAuthAttempt = ({send, nodeMsg, errorMsg, username, realm}) => {
+const handleFailedAuthAttempt = ({send, req, res, errorMsg, username, realm}) => {
   requestAuth({
-    nodeMsg,
+    res,
     realm
   });
 
+  const ipAddress = req.headers["x-real-ip"];
+
   send([null, {
     payload: errorMsg,
-    username
+    username,
+    ipAddress,
   }]);
 }
 
@@ -89,6 +92,12 @@ module.exports = function(RED) {
         node.send.apply(node, arguments);
       }
 
+      // Get req object
+      const req = nodeMsg.req._req || nodeMsg.req;
+
+      // Get res object
+      const res = nodeMsg.res._res || nodeMsg.res;
+
       // Get authentication header and type, if it exists
       const authHeader = nodeMsg.req.get("Authorization");
       const authHeaderMatches = authHeader ? authHeader.match(/^(\w+) (.*)$/) : [];
@@ -103,18 +112,20 @@ module.exports = function(RED) {
             rawAuthData,
             getUser,
             send,
-            realm
+            realm,
+            req,
+            res,
           });
         } else {
           requestAuth({
-            nodeMsg,
             realm,
+            res,
           });
         }
       } else {
         requestAuth({
-          nodeMsg,
           realm,
+          res,
         });
       };
 

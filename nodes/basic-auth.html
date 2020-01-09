@@ -63,4 +63,19 @@
     <li>Username: the configured username for authentication</li>
     <li>Password: the configured password for authentication</li>
   </ul>
+
+  <h2>Input</h2>
+  <p>Always the HTTP In node</p>
+
+  <h2>Output</h2>
+  <p>The `msg` object has this structure:</p>
+  <pre>
+    <code>
+      {
+        payload: string, // An error message describing the situation
+        username: string, // The username that the client attempted to log in with
+        ipAddress: string | undefined // The value in the X-Real-IP header
+      }
+    </code>
+  </pre>
 </script>
