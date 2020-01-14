@@ -52,9 +52,11 @@ const handleFailedAuthAttempt = ({send, req, res, errorMsg, username, realm}) =>
   });
 
   const ipAddress = req.headers["x-real-ip"];
+  const url = req.url || req.originalUrl;
 
   send([null, {
     payload: errorMsg,
+    url,
     username,
     ipAddress,
   }]);
@@ -102,31 +104,29 @@ module.exports = function(RED) {
       const authHeader = nodeMsg.req.get("Authorization");
       const authHeaderMatches = authHeader ? authHeader.match(/^(\w+) (.*)$/) : [];
 
+      const context = {
+        nodeMsg,
+        getUser,
+        send,
+        realm,
+        req,
+        res,
+      }
+
 			if (authHeader && authHeaderMatches[1] === "Basic") {
         // Get the raw authentication data string
         const rawAuthData = authHeaderMatches[2];
 
+        // Add it to the context
+        context.rawAuthData = rawAuthData;
+
         if (rawAuthData) {
-          verifyBasicAuth({
-            nodeMsg,
-            rawAuthData,
-            getUser,
-            send,
-            realm,
-            req,
-            res,
-          });
+          verifyBasicAuth(context);
         } else {
-          requestAuth({
-            realm,
-            res,
-          });
+          requestAuth(context);
         }
       } else {
-        requestAuth({
-          realm,
-          res,
-        });
+        requestAuth(context);
       };
 
       if (done) {

@@ -10,6 +10,9 @@ The second output will get called with a `msg` object with this structure:
   // An error message describing the situation
   payload: string,
 
+  // The URL or endpoint that was hit
+  url: string,
+
   // The username that the client attempted to log in with
   username: string,
 

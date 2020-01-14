@@ -73,6 +73,7 @@
     <code>
       {
         payload: string, // An error message describing the situation
+        url: string, // The URL or endpoint that was hit
         username: string, // The username that the client attempted to log in with
         ipAddress: string | undefined // The value in the X-Real-IP header
       }
